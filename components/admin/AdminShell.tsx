@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import {
   LayoutDashboard,
   FileStack,
@@ -11,6 +11,8 @@ import {
   GraduationCap,
   Settings,
   LogOut,
+  Menu,
+  X,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -26,6 +28,7 @@ const NAV = [
 export default function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   if (pathname === "/admin/login") return <>{children}</>;
 
@@ -38,6 +41,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen bg-brume-200">
+      {/* Sidebar Desktop */}
       <aside className="hidden w-72 shrink-0 flex-col border-r border-nuit-900/5 bg-nuit-950 text-white lg:flex">
         <div className="flex h-20 items-center gap-2.5 px-6">
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-400 to-nuit-700 font-display text-sm font-bold">
@@ -72,13 +76,49 @@ export default function AdminShell({ children }: { children: ReactNode }) {
         </button>
       </aside>
 
+      {/* Main Content Area */}
       <div className="flex min-h-screen flex-1 flex-col">
+        {/* Header Mobile avec bouton Menu Burger */}
         <header className="flex h-16 items-center justify-between border-b border-nuit-900/5 bg-white px-6 lg:hidden">
-          <span className="font-display text-sm font-bold text-nuit-950">ISSET ADMIN</span>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="rounded-lg p-2 text-nuit-950 hover:bg-gray-100"
+              aria-label="Ouvrir le menu"
+            >
+              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
+            <span className="font-display text-sm font-bold text-nuit-950">ISSET ADMIN</span>
+          </div>
           <button onClick={handleLogout} className="text-xs font-semibold text-red-500">
             Déconnexion
           </button>
         </header>
+
+        {/* Menu déroulant mobile */}
+        {mobileMenuOpen && (
+          <div className="border-b border-nuit-900/5 bg-nuit-950 px-4 py-4 text-white lg:hidden">
+            <nav className="space-y-1">
+              {NAV.map((item) => {
+                const active = pathname.startsWith(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
+                      active ? "bg-cyan-500/15 text-cyan-400" : "text-white/60 hover:bg-white/5 hover:text-white"
+                    }`}
+                  >
+                    <item.icon size={18} />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+        )}
+
         <main className="flex-1 p-6 sm:p-10">{children}</main>
       </div>
     </div>
