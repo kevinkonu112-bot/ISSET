@@ -5,7 +5,7 @@ import React, { useState } from "react";
 interface MediaItem {
   id?: string;
   src: string;
-  type: "video" | "pdf" | "image";
+  type: string; // Type élargi pour accepter toutes les valeurs de l'API
   alt?: string;
   titre?: string;
   title?: string;
@@ -13,7 +13,7 @@ interface MediaItem {
   desc?: string;
   texte?: string;
   contenu?: string;
-  [key: string]: any; // Permet de capturer n'importe quelle autre propriété envoyée par l'API
+  [key: string]: any;
 }
 
 interface GaleriePleinProps {
@@ -23,17 +23,11 @@ interface GaleriePleinProps {
 export default function GaleriePlein({ images }: GaleriePleinProps) {
   const [selectedImage, setSelectedImage] = useState<MediaItem | null>(null);
 
-  // Petit log dans la console de ton navigateur pour inspecter les données reçues
-  console.log("Données reçues dans la galerie :", images);
-
   return (
     <>
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {images.map((item, index) => {
-          // On cherche le titre dans toutes les variations possibles
           const displayTitle = item.titre || item.title || "Sans titre";
-          
-          // On cherche la description dans TOUTES les variations possibles (y compris ce que ton dashboard pourrait envoyer)
           const displayDesc = item.description || item.desc || item.texte || item.contenu || "";
 
           return (
@@ -64,9 +58,6 @@ export default function GaleriePlein({ images }: GaleriePleinProps) {
                       className="inline-flex items-center gap-2 rounded-full border border-nuit-950 px-6 py-2.5 text-sm font-semibold text-nuit-950 hover:bg-nuit-950 hover:text-white transition-all"
                     >
                       <span>Consulter le fichier</span>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
                     </a>
                   </div>
                 ) : (
@@ -85,15 +76,13 @@ export default function GaleriePlein({ images }: GaleriePleinProps) {
                 <h3 className="font-display font-bold text-nuit-950 text-base line-clamp-1">
                   {displayTitle}
                 </h3>
-
-                {/* Si la description existe, on l'affiche. Sinon, on affiche un message d'avertissement discret pour voir si le champ est vide */}
                 {displayDesc ? (
                   <p className="text-sm text-nuit-600 line-clamp-3 leading-relaxed">
                     {displayDesc}
                   </p>
                 ) : (
                   <p className="text-xs text-red-500 italic">
-                    (Aucune description reçue de la base de données)
+                    (Aucune description)
                   </p>
                 )}
               </div>
@@ -115,7 +104,6 @@ export default function GaleriePlein({ images }: GaleriePleinProps) {
             <button
               onClick={() => setSelectedImage(null)}
               className="absolute top-4 right-4 z-10 rounded-full bg-black/60 p-2 text-white hover:bg-black transition"
-              title="Fermer"
             >
               ✕
             </button>
