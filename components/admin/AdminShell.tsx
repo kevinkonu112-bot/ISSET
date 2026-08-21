@@ -78,26 +78,29 @@ export default function AdminShell({ children }: { children: ReactNode }) {
 
       {/* Main Content Area */}
       <div className="flex min-h-screen flex-1 flex-col">
-        {/* Header Mobile avec bouton Menu Burger */}
-        <header className="flex h-16 items-center justify-between border-b border-nuit-900/5 bg-white px-6 lg:hidden">
+        {/* Header Mobile dédié (visible uniquement sur petits écrans) */}
+        <header className="flex h-16 w-full items-center justify-between border-b border-nuit-900/10 bg-white px-4 lg:hidden shadow-sm z-20">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="rounded-lg p-2 text-nuit-950 hover:bg-gray-100"
+              className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-nuit-950 hover:bg-gray-200"
               aria-label="Ouvrir le menu"
             >
               {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
             <span className="font-display text-sm font-bold text-nuit-950">ISSET ADMIN</span>
           </div>
-          <button onClick={handleLogout} className="text-xs font-semibold text-red-500">
+          <button
+            onClick={handleLogout}
+            className="text-xs font-semibold text-red-600 px-2 py-1"
+          >
             Déconnexion
           </button>
         </header>
 
         {/* Menu déroulant mobile */}
         {mobileMenuOpen && (
-          <div className="border-b border-nuit-900/5 bg-nuit-950 px-4 py-4 text-white lg:hidden">
+          <div className="border-b border-nuit-900/10 bg-white px-4 py-4 lg:hidden shadow-lg z-10">
             <nav className="space-y-1">
               {NAV.map((item) => {
                 const active = pathname.startsWith(item.href);
@@ -107,7 +110,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
-                      active ? "bg-cyan-500/15 text-cyan-400" : "text-white/60 hover:bg-white/5 hover:text-white"
+                      active ? "bg-cyan-500/15 text-cyan-600 font-semibold" : "text-nuit-950 hover:bg-gray-100"
                     }`}
                   >
                     <item.icon size={18} />
@@ -119,6 +122,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
           </div>
         )}
 
+        {/* Contenu principal */}
         <main className="flex-1 p-6 sm:p-10">{children}</main>
       </div>
     </div>
