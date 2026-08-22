@@ -1,8 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
+
+// Initialisation directe du client Supabase pour éviter les erreurs de modules helpers
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
@@ -10,7 +15,6 @@ export default function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const supabase = createClientComponentClient();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,7 +73,7 @@ export default function AdminLoginPage() {
           </div>
 
           <div className="flex items-center justify-between text-sm">
-            <a href="/admin/forgot-password" class="text-cyan-400 hover:underline">
+            <a href="/admin/forgot-password" className="text-cyan-400 hover:underline">
               Mot de passe oublié ?
             </a>
           </div>

@@ -15,8 +15,8 @@ const body = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "ISSET — Lomé, Togo",
-  description: "Établissement d'enseignement secondaire technique à Lomé, Togo.",
+  title: "ISSET — Institutions Scientifiques Supérieures et d'Enseignement Technique | Tsévié, Togo",
+  description: "Établissement d'enseignement secondaire technique à Tsévié, Togo.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
