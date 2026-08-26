@@ -35,9 +35,6 @@ export async function POST(request: Request) {
     // 3. Sauvegarder ou mettre à jour le code dans la table 'password_resets'
     const { error: dbError } = await supabaseAdmin
       .from('password_resets')
-      param: {
-        onConflict: 'email'
-      }
       .upsert(
         { email, otp, expires_at: expiresAt },
         { onConflict: 'email' }
@@ -48,7 +45,7 @@ export async function POST(request: Request) {
       throw new Error("Erreur lors de l'enregistrement de la demande de réinitialisation.");
     }
 
-    // 4. Envoyer l'e-mail via Brevo (en utilisant l'e-mail Brevo comme expéditeur pour les tests)
+    // 4. Envoyer l'e-mail via Brevo
     await transporter.sendMail({
       from: `"ISSET Admin" <${process.env.BREVO_USER}>`,
       to: email,

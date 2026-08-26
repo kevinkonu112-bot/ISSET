@@ -1,33 +1,61 @@
 "use client";
 
 import { useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { useRouter } from "next/navigation";
+import { createBrowserClient } from "@supabase/ssr";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function AdminLoginPage() {
+  // Initialisation propre avec le client SSR navigateur de Supabase
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
-  const supabase = createClientComponentClient();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
+
+    if (!email || !password) {
+      setError("Veuillez remplir tous les champs.");
+      return;
+    }
+
+    console.log("--- TENTATIVE DE CONNEXION ---");
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      setError("Email ou mot de passe incorrect.");
+      console.log("Réponse Supabase Auth:", { data, authError });
+
+      if (authError) {
+        setError(authError.message || "Identifiants incorrects.");
+        setLoading(false);
+        return;
+      }
+
+      if (data?.session) {
+        console.log("Connexion réussie ! Redirection en cours...");
+        // Redirection forcée vers le dashboard
+        window.location.href = "/admin/dashboard";
+      } else {
+        setError("Erreur : Aucune session n'a pu être ouverte.");
+        setLoading(false);
+      }
+    } catch (err: any) {
+      console.error("Erreur critique catch:", err);
+      setError("Une erreur inattendue est survenue.");
       setLoading(false);
-    } else {
-      router.push("/admin/contenus");
-      router.refresh();
     }
   };
 
@@ -48,28 +76,37 @@ export default function AdminLoginPage() {
             <label className="block text-sm font-medium text-gray-300 mb-1">Email administrateur</label>
             <input
               type="email"
-              required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2 bg-nuit-950 border border-nuit-800 rounded-lg text-white focus:outline-none focus:border-cyan-500"
               placeholder="admin@isset.tg"
+              required
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">Mot de passe</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 bg-nuit-950 border border-nuit-800 rounded-lg text-white focus:outline-none focus:border-cyan-500"
-              placeholder="••••••••"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-2 bg-nuit-950 border border-nuit-800 rounded-lg text-white focus:outline-none focus:border-cyan-500 pr-10"
+                placeholder="••••••••"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white focus:outline-none"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center justify-between text-sm">
-            <a href="/admin/forgot-password" class="text-cyan-400 hover:underline">
+            <a href="/admin/forgot-password" className="text-cyan-400 hover:underline">
               Mot de passe oublié ?
             </a>
           </div>
@@ -77,7 +114,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-lg transition duration-200 disabled:opacity-50"
+            className="w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-lg transition duration-200 disabled:opacity-50 cursor-pointer"
           >
             {loading ? "Connexion en cours..." : "Se connecter"}
           </button>

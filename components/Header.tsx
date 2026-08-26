@@ -39,9 +39,13 @@ export default function Header() {
     >
       <div className="container-isset flex h-20 items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5" onClick={() => setOpen(false)}>
-          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-400 to-nuit-700 font-display text-lg font-bold text-white">
-            I
-          </span>
+          <div className="relative w-12 h-12 flex items-center justify-center shrink-0">
+            <img
+              src="/logo_isset.png"
+              alt="Logo ISSET"
+              className="w-10 h-10 object-contain animate-spin-slow logo-image"
+            />
+          </div>
           <span className="font-display text-lg font-bold tracking-tight text-white">
             ISSET
           </span>

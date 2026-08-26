@@ -6,9 +6,14 @@ export default function Footer() {
       <div className="container-isset grid gap-10 py-16 md:grid-cols-4">
         <div className="md:col-span-2">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-400 to-nuit-700 font-display text-lg font-bold text-white">
-              I
-            </span>
+            {/* Nouveau logo globe en rotation permanente à la place du "I" */}
+            <div className="relative w-12 h-12 flex items-center justify-center shrink-0">
+              <img
+                src="/logo_isset.png"
+                alt="Logo ISSET"
+                className="w-10 h-10 object-contain animate-spin-slow logo-image"
+              />
+            </div>
             <span className="font-display text-lg font-bold text-white">ISSET</span>
           </div>
           <p className="mt-4 max-w-sm text-sm leading-relaxed">
@@ -53,7 +58,7 @@ export default function Footer() {
       <div className="border-t border-white/10">
         <div className="container-isset flex flex-col items-center justify-between gap-3 py-6 text-xs text-white/50 sm:flex-row">
           <p>© 2026 ISSET — Tous droits réservés.</p>
-          <p>Site web conçu et développé par [À RENSEIGNER]</p>
+          <p>Site web conçu et développé par Digital Elite Lab</p>
         </div>
       </div>
     </footer>

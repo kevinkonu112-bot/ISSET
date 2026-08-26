@@ -1,6 +1,6 @@
 import IssetLogo from "@/components/IssetLogo";
 import Link from "next/link";
-import { ArrowRight, GraduationCap, Cpu, Wrench, Building2 } from "lucide-react";
+import { ArrowRight, GraduationCap, Cpu, Building2, Wrench } from "lucide-react";
 import Reveal from "@/components/Reveal";
 import { FILIERES, SERIES, whatsappHref } from "@/lib/data";
 import { getActualites, mediaPublicUrl } from "@/lib/contents";
@@ -10,66 +10,56 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* ============ HERO ============ */}
-      <section className="relative flex min-h-[92vh] items-center overflow-hidden bg-nuit-950 text-white">
-        <div className="absolute inset-0 bg-grid-glow" />
-        <div
-          className="absolute inset-0 opacity-25"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(18,181,214,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(18,181,214,0.15) 1px, transparent 1px)",
-            backgroundSize: "56px 56px",
-            maskImage: "radial-gradient(ellipse at center, black 0%, transparent 75%)",
-          }}
-        />
-        <div className="container-isset relative z-10 pt-28 pb-20">
+      {/* ============ HERO SECTION (IMAGE NETTE ET LUMINEUSE) ============ */}
+      <section className="relative bg-nuit-950 text-white min-h-[85vh] sm:min-h-screen flex flex-col justify-between pt-20 pb-8 sm:py-16 overflow-hidden">
+        
+        {/* Image de fond claire et optimisée */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src="/batiment_isset.jpg"
+            alt="Bâtiment de l'ISSET à Tsévié"
+            className="w-full h-full object-cover object-center opacity-90"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-nuit-950/60 via-nuit-950/25 to-nuit-950/90" />
+        </div>
+
+        {/* Contenu du haut : Badge, Logo et Texte principal */}
+        <div className="container-isset relative z-10 text-center sm:text-left my-auto">
           <Reveal>
-            <span className="section-label text-cyan-400">
-              Établissement d'enseignement secondaire technique — Lomé, Togo
+            <span className="inline-block section-label text-cyan-400 bg-nuit-950/80 px-3.5 py-1.5 rounded-full border border-cyan-500/30 backdrop-blur-md shadow-lg text-[10px] sm:text-sm">
+              Établissement d'enseignement secondaire technique — Tsévié, Togo
             </span>
           </Reveal>
 
-          {/* Le Logo Animé Pro remplace l'ancien texte */}
           <Reveal delay={100}>
-            <div className="mt-6">
+            <div className="mt-3 flex justify-center sm:justify-start scale-95 sm:scale-100 origin-left">
               <IssetLogo />
             </div>
           </Reveal>
 
           <Reveal delay={200}>
-            <p className="mt-8 max-w-2xl text-lg leading-relaxed text-white/70 mx-auto text-center sm:mx-0 sm:text-left">
+            <p className="mt-3 max-w-2xl text-xs sm:text-lg leading-relaxed text-white/95 font-medium mx-auto sm:mx-0 drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
               Former aujourd'hui les compétences techniques et professionnelles de demain.
               Deux filières, six séries, une même exigence d'excellence.
             </p>
           </Reveal>
+        </div>
 
+        {/* Bloc Statistiques */}
+        <div className="container-isset relative z-10 mt-6 sm:mt-8">
           <Reveal delay={300}>
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row justify-center sm:justify-start">
-              <Link href="/filieres" className="btn-primary">
-                Découvrir nos filières <ArrowRight size={16} />
-              </Link>
-              <Link href="/contact" className="btn-secondary">
-                Nous contacter
-              </Link>
-              <a href={whatsappHref()} target="_blank" rel="noopener noreferrer" className="btn-secondary">
-                Écrire sur WhatsApp
-              </a>
-            </div>
-          </Reveal>
-
-          <Reveal delay={400}>
-            <div className="mt-20 grid grid-cols-2 gap-6 border-t border-white/10 pt-10 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 bg-nuit-950/95 border border-cyan-500/30 p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl backdrop-blur-xl shadow-2xl">
               {[
                 { label: "Filières", value: "2" },
                 { label: "Séries", value: "6" },
                 { label: "Domaines", value: "Éco. & Industriel" },
-                { label: "Localisation", value: "Lomé, Togo" },
+                { label: "Localisation", value: "Tsévié, Togo" },
               ].map((stat) => (
-                <div key={stat.label}>
-                  <p className="font-display text-2xl font-bold text-cyan-400 sm:text-3xl">
+                <div key={stat.label} className="text-center sm:text-left">
+                  <p className="font-display text-base sm:text-3xl font-bold text-cyan-400 drop-shadow-md">
                     {stat.value}
                   </p>
-                  <p className="mt-1 text-xs uppercase tracking-wider text-white/50">
+                  <p className="mt-0.5 text-[9px] sm:text-xs uppercase tracking-wider text-white/90 font-semibold">
                     {stat.label}
                   </p>
                 </div>
@@ -79,20 +69,89 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ============ 01 — À PROPOS ============ */}
-      <section className="bg-brume-100 py-24 sm:py-32">
+      {/* ============ 01 — NOS FILIÈRES (PLACÉE JUSTE APRÈS LE HERO) ============ */}
+      <section className="bg-nuit-950 py-20 text-white sm:py-32 border-t border-white/10">
+        <div className="container-isset">
+          <Reveal>
+            <span className="section-label text-cyan-400">01 — Nos filières</span>
+            <h2 className="mt-4 max-w-2xl font-display text-3xl font-bold tracking-tight sm:text-4xl">
+              Deux filières, six voies d'excellence.
+            </h2>
+          </Reveal>
+
+          <div className="mt-14 grid gap-8 lg:grid-cols-2">
+            {FILIERES.map((filiere, idx) => {
+              const recBgImage = filiere.slug === "economique" 
+                ? "/images/filieres/economique.png" 
+                : "/images/filieres/industrielle.png";
+
+              return (
+                <Reveal key={filiere.slug} delay={idx * 150}>
+                  {/* RETRAIT DU LIEN GLOBAL SUR TOUTE LA CARTE (div simple à la place de Link) */}
+                  <div className="group relative block overflow-hidden rounded-3xl border border-white/10 p-10 transition-all duration-500 hover:border-cyan-400/40 bg-nuit-900/50">
+                    <div 
+                      className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105 opacity-40"
+                      style={{ backgroundImage: `url(${recBgImage})` }}
+                    />
+                    
+                    <div className="absolute inset-0 bg-nuit-950/85 transition-colors duration-500 group-hover:bg-nuit-950/75" />
+
+                    <div className="relative z-10">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-400">
+                        {filiere.slug === "economique" ? (
+                          <GraduationCap size={26} />
+                        ) : (
+                          <Cpu size={26} />
+                        )}
+                      </div>
+                      <h3 className="mt-6 font-display text-2xl font-bold">{filiere.nom}</h3>
+                      <p className="mt-3 text-sm leading-relaxed text-white/80">
+                        {filiere.description}
+                      </p>
+                      <ul className="mt-6 flex flex-wrap gap-2">
+                        {SERIES.filter((s) => s.filiereSlug === filiere.slug).map((s) => (
+                          <li
+                            key={s.code}
+                            className="rounded-full border border-white/20 bg-white/5 px-3 py-1 text-xs font-medium text-white/80"
+                          >
+                            {s.code} — {s.nom}
+                          </li>
+                        ))}
+                      </ul>
+                      
+                      {/* REDIRECTION STRICTEMENT LIMITÉE AU BOUTON "EXPLORER" */}
+                      <div className="mt-8">
+                        <Link
+                          href={`/filieres#${filiere.slug}`}
+                          className="inline-flex items-center gap-2 text-sm font-semibold text-cyan-400 hover:text-cyan-300 transition-colors"
+                        >
+                          Explorer la filière
+                          <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </Reveal>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ============ 02 — À PROPOS ============ */}
+      <section className="bg-brume-100 py-20 sm:py-32">
         <div className="container-isset grid gap-14 lg:grid-cols-2 lg:gap-20">
           <Reveal>
-            <span className="section-label">01 — À propos d'ISSET</span>
+            <span className="section-label">02 — À propos d'ISSET</span>
             <h2 className="mt-4 font-display text-3xl font-bold tracking-tight text-nuit-950 sm:text-4xl">
-              Un établissement tourné vers la science, la technique et l'avenir.
+              Un établissement tourné vers la science, la technique et l'avenir à Tsévié.
             </h2>
             <p className="mt-6 leading-relaxed text-nuit-700">
               [À RENSEIGNER PAR L'ADMINISTRATEUR] — présentation générale de l'établissement,
-              de son histoire et de son ancrage à Lomé.
+              de son histoire et de son ancrage à Tsévié.
             </p>
-            <Link href="/a-propos" className="btn-outline-dark mt-8">
-              En savoir plus <ArrowRight size={16} />
+            <Link href="/a-propos" className="btn-outline-dark mt-8 inline-flex items-center">
+              En savoir plus <ArrowRight size={16} className="ml-2" />
             </Link>
           </Reveal>
 
@@ -117,7 +176,7 @@ export default async function HomePage() {
       </section>
 
       {/* ============ ACTUALITÉS & ÉVÉNEMENTS ============ */}
-      <section className="bg-nuit-950 py-24 text-white sm:py-32 border-t border-white/10">
+      <section className="bg-nuit-950 py-20 text-white sm:py-32 border-t border-white/10">
         <div className="container-isset">
           <Reveal>
             <div className="flex flex-wrap items-end justify-between gap-6">
@@ -137,8 +196,7 @@ export default async function HomePage() {
             {actualites.length === 0 && (
               <Reveal className="col-span-full">
                 <div className="rounded-3xl border border-dashed border-white/15 bg-white/[0.03] p-12 text-center text-white/50 backdrop-blur-sm">
-                  Aucune actualité publiée pour le moment. Les prochaines actualités
-                  publiées depuis l'espace administrateur apparaîtront ici.
+                  Aucune actualité publiée pour le moment.
                 </div>
               </Reveal>
             )}
@@ -221,72 +279,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ============ 02 — NOS FILIÈRES ============ */}
-      <section className="bg-nuit-950 py-24 text-white sm:py-32 border-t border-white/10">
-        <div className="container-isset">
-          <Reveal>
-            <span className="section-label text-cyan-400">02 — Nos filières</span>
-            <h2 className="mt-4 max-w-2xl font-display text-3xl font-bold tracking-tight sm:text-4xl">
-              Deux filières, six voies d'excellence.
-            </h2>
-          </Reveal>
-
-          <div className="mt-14 grid gap-8 lg:grid-cols-2">
-            {FILIERES.map((filiere, idx) => {
-              const bgImage = filiere.slug === "economique" 
-                ? "/images/filieres/economique.png" 
-                : "/images/filieres/industrielle.png";
-
-              return (
-                <Reveal key={filiere.slug} delay={idx * 150}>
-                  <Link
-                    href={`/filieres#${filiere.slug}`}
-                    className="group relative block overflow-hidden rounded-3xl border border-white/10 p-10 transition-all duration-500 hover:border-cyan-400/40"
-                  >
-                    <div 
-                      className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                      style={{ backgroundImage: `url(${bgImage})` }}
-                    />
-                    
-                    <div className="absolute inset-0 bg-nuit-950/85 transition-colors duration-500 group-hover:bg-nuit-950/75" />
-
-                    <div className="relative z-10">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-400">
-                        {filiere.slug === "economique" ? (
-                          <GraduationCap size={26} />
-                        ) : (
-                          <Cpu size={26} />
-                        )}
-                      </div>
-                      <h3 className="mt-6 font-display text-2xl font-bold">{filiere.nom}</h3>
-                      <p className="mt-3 text-sm leading-relaxed text-white/80">
-                        {filiere.description}
-                      </p>
-                      <ul className="mt-6 flex flex-wrap gap-2">
-                        {SERIES.filter((s) => s.filiereSlug === filiere.slug).map((s) => (
-                          <li
-                            key={s.code}
-                            className="rounded-full border border-white/20 bg-white/5 px-3 py-1 text-xs font-medium text-white/80"
-                          >
-                            {s.code} — {s.nom}
-                          </li>
-                        ))}
-                      </ul>
-                      <span className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-cyan-400">
-                        Explorer la filière
-                        <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-                      </span>
-                    </div>
-                  </Link>
-                </Reveal>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
       {/* ============ ADMISSION CTA ============ */}
-      <section className="relative overflow-hidden bg-nuit-950 py-24 text-white sm:py-28 border-t border-white/10">
+      <section className="relative overflow-hidden bg-nuit-950 py-20 text-white sm:py-28 border-t border-white/10">
         <div className="absolute inset-0 bg-grid-glow" />
         <div className="container-isset relative z-10 flex flex-col items-start gap-8 lg:flex-row lg:items-center lg:justify-between">
           <Reveal>

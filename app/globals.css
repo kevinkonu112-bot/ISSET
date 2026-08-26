@@ -71,3 +71,27 @@ body {
 .reveal.is-visible {
   animation: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* ==========================================================
+   ANIMATION DE ROTATION PERMANENTE DU LOGO (PC & Mobile)
+   ================================================---------- */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 12s linear infinite;
+  will-change: transform; /* Optimisation GPU pour fluide sur smartphone */
+}
+
+/* Désactive la sélection tactile intempestive sur mobile */
+.logo-image {
+  -webkit-touch-callout: none;
+  user-select: none;
+  pointer-events: none;
+}
