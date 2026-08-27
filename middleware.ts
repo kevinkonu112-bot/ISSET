@@ -58,33 +58,39 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isLoginPage = request.nextUrl.pathname === "/admin/login" || request.nextUrl.pathname === "/admin";
-  const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
+  const pathname = request.nextUrl.pathname;
 
-  // 1. Si route admin (hors login) et pas d'utilisateur -> Redirection vers login
-  if (isAdminRoute && !isLoginPage && !user) {
+  // Pages publiques de l'admin (connexion et récupération de mot de passe)
+  const isPublicAdminPage = 
+    pathname === "/admin" || 
+    pathname === "/admin/login" || 
+    pathname === "/admin/forgot-password";
+
+  const isAdminRoute = pathname.startsWith("/admin");
+
+  // 1. Si route admin (hors pages publiques) et pas d'utilisateur -> Redirection vers login
+  if (isAdminRoute && !isPublicAdminPage && !user) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin/login";
-    url.searchParams.set("redirectTo", request.nextUrl.pathname);
+    url.searchParams.set("redirectTo", pathname);
     return NextResponse.redirect(url);
   }
 
   // 2. Si l'utilisateur est connecté et essaie d'aller sur le login -> Redirection vers dashboard
-  if (isLoginPage && user) {
+  if (isPublicAdminPage && user && pathname !== "/admin/forgot-password") {
     const url = request.nextUrl.clone();
     url.pathname = "/admin/dashboard";
     return NextResponse.redirect(url);
   }
 
-  // 3. Vérification optionnelle du rôle dans la table profiles (sécurisée pour éviter les blocages si la table est vide)
-  if (isAdminRoute && !isLoginPage && user) {
+  // 3. Vérification optionnelle du rôle dans la table profiles
+  if (isAdminRoute && !isPublicAdminPage && user) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", user.id)
       .maybeSingle();
 
-    // Si le profil existe et qu'un rôle est défini, on vérifie. S'il n'existe pas encore, on laisse passer pour éviter le blocage.
     if (profile && profile.role) {
       const hasAccess = profile.role === "admin" || profile.role === "editeur";
       if (!hasAccess) {

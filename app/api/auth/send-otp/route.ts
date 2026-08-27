@@ -45,9 +45,9 @@ export async function POST(request: Request) {
       throw new Error("Erreur lors de l'enregistrement de la demande de réinitialisation.");
     }
 
-    // 4. Envoyer l'e-mail via Brevo
+    // 4. Envoyer l'e-mail via Brevo avec ton adresse vérifiée kevinkonu112@gmail.com
     await transporter.sendMail({
-      from: `"ISSET Admin" <${process.env.BREVO_USER}>`,
+      from: `"ISSET Admin" <kevinkonu112@gmail.com>`,
       to: email,
       subject: 'Votre code de réinitialisation de mot de passe',
       html: `
