@@ -1,12 +1,12 @@
 "use client";
 
-import type { Metadata } from "next";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
+import { Suspense } from "react";
 import { ArrowRight, Cpu, GraduationCap } from "lucide-react";
 import { FILIERES, getSeriesByFiliere } from "@/lib/data";
 
-export default function FilieresPage() {
+function FilieresContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -129,5 +129,13 @@ export default function FilieresPage() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function FilieresPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-brume-100 flex items-center justify-center">Chargement...</div>}>
+      <FilieresContent />
+    </Suspense>
   );
 }
