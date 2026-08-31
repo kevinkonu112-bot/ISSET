@@ -1,6 +1,8 @@
+"use client";
+
 import { FILIERES, getSeriesByFiliere } from "@/lib/data";
 import { notFound } from "next/navigation";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, GraduationCap, Cpu, ArrowRight } from "lucide-react";
 import Reveal from "@/components/Reveal";
 
@@ -28,9 +30,22 @@ export default async function FiliereDetailPage({ params }: PageProps) {
       : "/images/filieres/banniere-industrielle.png";
 
   return (
+    <ClientPageContent
+      currentFiliere={currentFiliere}
+      seriesList={seriesList}
+      bannerImage={bannerImage}
+    />
+  );
+}
+
+// Composant client pour gérer le retour en arrière dynamique
+function ClientPageContent({ currentFiliere, seriesList, bannerImage }: any) {
+  const router = useRouter();
+
+  return (
     <div className="w-full">
       {/* =========================================================
-          EN-TÊTE PLEINE LARGEUR (Hero clair et épuré - Sans le badge)
+          EN-TÊTE PLEINE LARGEUR (Hero clair et épuré)
           ========================================================= */}
       <section className="relative w-full bg-nuit-950 pb-20 pt-36 sm:pt-44 text-white overflow-hidden">
         <div
@@ -41,13 +56,13 @@ export default async function FiliereDetailPage({ params }: PageProps) {
 
         <div className="container-isset relative z-10">
           <Reveal>
-            <Link
-              href="/filieres"
-              className="inline-flex items-center gap-2 text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors mb-6"
+            <button
+              onClick={() => router.back()}
+              className="inline-flex items-center gap-2 text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors mb-6 cursor-pointer bg-transparent border-none p-0"
             >
               <ArrowLeft size={16} />
-              Retour aux filières
-            </Link>
+              Retour
+            </button>
           </Reveal>
 
           <Reveal delay={100}>
@@ -96,9 +111,9 @@ export default async function FiliereDetailPage({ params }: PageProps) {
 
           {/* Grille responsive des séries */}
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {seriesList.map((s, idx) => (
+            {seriesList.map((s: any, idx: number) => (
               <Reveal key={s.slug} delay={300 + idx * 100}>
-                <Link
+                <a
                   href={`/filieres/${s.filiereSlug}/${s.slug}`}
                   className="card-premium group flex flex-col bg-white h-full justify-between p-6 rounded-2xl border border-nuit-100 shadow-sm hover:shadow-md transition-all"
                 >
@@ -117,7 +132,7 @@ export default async function FiliereDetailPage({ params }: PageProps) {
                     Découvrir la série
                     <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
                   </span>
-                </Link>
+                </a>
               </Reveal>
             ))}
           </div>
