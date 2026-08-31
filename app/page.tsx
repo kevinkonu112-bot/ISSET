@@ -87,7 +87,6 @@ export default async function HomePage() {
 
               return (
                 <Reveal key={filiere.slug} delay={idx * 150}>
-                  {/* RETRAIT DU LIEN GLOBAL SUR TOUTE LA CARTE (div simple à la place de Link) */}
                   <div className="group relative block overflow-hidden rounded-3xl border border-white/10 p-10 transition-all duration-500 hover:border-cyan-400/40 bg-nuit-900/50">
                     <div 
                       className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105 opacity-40"
@@ -119,10 +118,10 @@ export default async function HomePage() {
                         ))}
                       </ul>
                       
-                      {/* REDIRECTION STRICTEMENT LIMITÉE AU BOUTON "EXPLORER" */}
+                      {/* REDIRECTION CORRIGÉE VERS LA PAGE DÉDIÉE DE LA FILIÈRE */}
                       <div className="mt-8">
                         <Link
-                          href={`/filieres#${filiere.slug}`}
+                          href={`/filieres/${filiere.slug}`}
                           className="inline-flex items-center gap-2 text-sm font-semibold text-cyan-400 hover:text-cyan-300 transition-colors"
                         >
                           Explorer la filière
