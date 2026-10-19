@@ -134,8 +134,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </aside>
 
-      {/* 4. CONTENU PRINCIPAL (Marge supérieure ajoutée sur mobile pour éviter la barre fixe) */}
-      <main className="flex-1 p-4 sm:p-8 pt-20 md:pt-8 overflow-y-auto bg-nuit-950 text-white w-full">
+      {/* 4. CONTENU PRINCIPAL AVEC FOND CLAIR */}
+      <main className="flex-1 p-4 sm:p-8 pt-20 md:pt-8 overflow-y-auto bg-gray-50 text-slate-900 w-full">
         {children}
       </main>
     </div>

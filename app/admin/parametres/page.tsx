@@ -3,18 +3,18 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-const CHAMPS: { cle: string; label: string; multiline?: boolean }[] = [
-  { cle: "adresse", label: "Adresse exacte" },
-  { cle: "email", label: "Email officiel" },
-  { cle: "telephone_secondaire", label: "Autre téléphone" },
-  { cle: "horaires", label: "Horaires d'ouverture" },
-  { cle: "facebook", label: "Lien Facebook" },
-  { cle: "instagram", label: "Lien Instagram" },
-  { cle: "mission", label: "Mission", multiline: true },
-  { cle: "vision", label: "Vision", multiline: true },
-  { cle: "valeurs", label: "Valeurs", multiline: true },
-  { cle: "mot_directeur", label: "Mot du directeur", multiline: true },
-  { cle: "conditions_admission", label: "Conditions d'admission", multiline: true },
+const CHAMPS: { cle: string; label: string; multiline?: boolean; placeholder: string }[] = [
+  { cle: "adresse", label: "Adresse exacte", placeholder: "[À RENSEIGNER PAR L'ADMINISTRATEUR]" },
+  { cle: "email", label: "Email officiel", placeholder: "[À RENSEIGNER PAR L'ADMINISTRATEUR]" },
+  { cle: "telephone_secondaire", label: "Autre téléphone", placeholder: "[À RENSEIGNER PAR L'ADMINISTRATEUR]" },
+  { cle: "horaires", label: "Horaires d'ouverture", placeholder: "[À RENSEIGNER PAR L'ADMINISTRATEUR]" },
+  { cle: "facebook", label: "Lien Facebook", placeholder: "https://facebook.com/..." },
+  { cle: "instagram", label: "Lien Instagram", placeholder: "https://instagram.com/..." },
+  { cle: "mission", label: "Mission", multiline: true, placeholder: "[À RENSEIGNER PAR L'ADMINISTRATEUR]" },
+  { cle: "vision", label: "Vision", multiline: true, placeholder: "[À RENSEIGNER PAR L'ADMINISTRATEUR]" },
+  { cle: "valeurs", label: "Valeurs", multiline: true, placeholder: "[À RENSEIGNER PAR L'ADMINISTRATEUR]" },
+  { cle: "mot_directeur", label: "Mot du directeur", multiline: true, placeholder: "[À RENSEIGNER PAR L'ADMINISTRATEUR]" },
+  { cle: "conditions_admission", label: "Conditions d'admission", multiline: true, placeholder: "[Informations à compléter par l'administration]" },
 ];
 
 export default function AdminParametresPage() {
@@ -47,27 +47,29 @@ export default function AdminParametresPage() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-bold text-nuit-950">Paramètres</h1>
-      <p className="mt-1 text-sm text-nuit-500">
+      <h1 className="font-display text-2xl font-bold text-slate-900">Paramètres</h1>
+      <p className="mt-1 text-sm text-slate-600">
         Coordonnées, réseaux sociaux et textes institutionnels affichés sur le site public.
       </p>
 
       <form onSubmit={handleSave} className="mt-8 grid gap-5 sm:grid-cols-2">
         {CHAMPS.map((champ) => (
           <div key={champ.cle} className={champ.multiline ? "sm:col-span-2" : ""}>
-            <label className="text-sm font-medium text-nuit-800">{champ.label}</label>
+            <label className="text-sm font-semibold text-slate-800">{champ.label}</label>
             {champ.multiline ? (
               <textarea
                 rows={3}
-                value={values[champ.cle] || ""}
+                value={values[champ.cle] ?? ""}
+                placeholder={champ.placeholder}
                 onChange={(e) => setValues((v) => ({ ...v, [champ.cle]: e.target.value }))}
-                className="mt-1.5 w-full rounded-xl border border-nuit-900/10 p-3 text-sm outline-none focus:border-cyan-500"
+                className="mt-1.5 w-full rounded-xl border border-slate-300 bg-white p-3 text-sm text-slate-900 outline-none focus:border-cyan-500 placeholder:text-slate-400"
               />
             ) : (
               <input
-                value={values[champ.cle] || ""}
+                value={values[champ.cle] ?? ""}
+                placeholder={champ.placeholder}
                 onChange={(e) => setValues((v) => ({ ...v, [champ.cle]: e.target.value }))}
-                className="mt-1.5 w-full rounded-xl border border-nuit-900/10 p-3 text-sm outline-none focus:border-cyan-500"
+                className="mt-1.5 w-full rounded-xl border border-slate-300 bg-white p-3 text-sm text-slate-900 outline-none focus:border-cyan-500 placeholder:text-slate-400"
               />
             )}
           </div>
@@ -77,7 +79,7 @@ export default function AdminParametresPage() {
           <button type="submit" disabled={saving} className="btn-primary">
             {saving ? "Enregistrement..." : "Enregistrer les paramètres"}
           </button>
-          {saved && <span className="ml-4 text-sm text-emerald-600">Enregistré ✓</span>}
+          {saved && <span className="ml-4 text-sm text-emerald-600 font-medium">Enregistré ✓</span>}
         </div>
       </form>
     </div>

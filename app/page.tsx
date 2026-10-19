@@ -10,8 +10,8 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* ============ HERO SECTION (IMAGE NETTE ET LUMINEUSE) ============ */}
-      <section className="relative bg-nuit-950 text-white min-h-[85vh] sm:min-h-screen flex flex-col justify-between pt-20 pb-8 sm:py-16 overflow-hidden">
+      {/* ============ HERO SECTION (CORRIGÉ : ESPACEMENT HAUT AUGMENTÉ) ============ */}
+      <section className="relative bg-nuit-950 text-white min-h-[85vh] sm:min-h-screen flex flex-col justify-between pt-36 sm:pt-44 pb-8 sm:py-16 overflow-hidden">
         
         {/* Image de fond claire et optimisée */}
         <div className="absolute inset-0 z-0">
