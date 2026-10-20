@@ -30,7 +30,7 @@ export default async function FiliereDetailPage({ params }: PageProps) {
   return (
     <div className="w-full">
       {/* =========================================================
-          EN-TÊTE PLEINE LARGEUR (Hero clair et épuré)
+          EN-TÊTE PLEINE LARGEUR (Hero)
          ========================================================= */}
       <section className="relative w-full bg-nuit-950 pb-20 pt-36 sm:pt-44 text-white overflow-hidden">
         <div
@@ -41,6 +41,7 @@ export default async function FiliereDetailPage({ params }: PageProps) {
 
         <div className="container-isset relative z-10">
           <Reveal>
+            {/* LIEN DE RETOUR FIABLE : Redirige directement et proprement vers /filieres */}
             <Link
               href="/filieres"
               className="inline-flex items-center gap-2 text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors mb-6 cursor-pointer"
@@ -62,11 +63,11 @@ export default async function FiliereDetailPage({ params }: PageProps) {
       </section>
 
       {/* =========================================================
-          CONTENU SUR FOND CLAIR AVEC BLOC SOMBRE (Style P1)
+          CONTENU PRINCIPAL
          ========================================================= */}
       <section className="bg-brume-100 py-16 w-full">
         <div className="container-isset">
-          {/* Bloc rectangulaire au design sombre (style P1) */}
+          {/* Bloc d'en-tête de la filière */}
           <div className="mb-14 rounded-3xl border border-cyan-500/40 bg-nuit-950 text-white p-6 sm:p-8 shadow-glow">
             <div className="flex flex-col sm:flex-row items-start gap-5">
               <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-cyan-500/15 text-cyan-400">
@@ -94,7 +95,7 @@ export default async function FiliereDetailPage({ params }: PageProps) {
             </h2>
           </Reveal>
 
-          {/* Grille responsive des séries (Conteneur div : pas de clic fortuit sur toute la carte) */}
+          {/* Liste des cartes : Carte non-cliquable globalement, seul le bouton 'Découvrir la série' redirige */}
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {seriesList.map((s: any, idx: number) => (
               <Reveal key={s.slug} delay={300 + idx * 100}>
@@ -111,7 +112,6 @@ export default async function FiliereDetailPage({ params }: PageProps) {
                     </p>
                   </div>
                   
-                  {/* SEUL CE BOUTON DÉCLENCHE LA NAVIGATION */}
                   <div className="mt-6 pt-4 border-t border-slate-100">
                     <Link
                       href={`/filieres/${s.filiereSlug}/${s.slug}`}
