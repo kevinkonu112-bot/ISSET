@@ -1,9 +1,7 @@
-"use client";
-
 import { FILIERES, getSeriesByFiliere } from "@/lib/data";
 import { notFound } from "next/navigation";
-import { useRouter } from "next/navigation";
-import { ArrowLeft, GraduationCap, Cpu, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { GraduationCap, Cpu, ArrowRight, ArrowLeft } from "lucide-react";
 import Reveal from "@/components/Reveal";
 
 interface PageProps {
@@ -30,23 +28,10 @@ export default async function FiliereDetailPage({ params }: PageProps) {
       : "/images/filieres/banniere-industrielle.png";
 
   return (
-    <ClientPageContent
-      currentFiliere={currentFiliere}
-      seriesList={seriesList}
-      bannerImage={bannerImage}
-    />
-  );
-}
-
-// Composant client pour gérer le retour en arrière dynamique
-function ClientPageContent({ currentFiliere, seriesList, bannerImage }: any) {
-  const router = useRouter();
-
-  return (
     <div className="w-full">
       {/* =========================================================
           EN-TÊTE PLEINE LARGEUR (Hero clair et épuré)
-          ========================================================= */}
+         ========================================================= */}
       <section className="relative w-full bg-nuit-950 pb-20 pt-36 sm:pt-44 text-white overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center transition-all duration-700 opacity-55"
@@ -56,13 +41,13 @@ function ClientPageContent({ currentFiliere, seriesList, bannerImage }: any) {
 
         <div className="container-isset relative z-10">
           <Reveal>
-            <button
-              onClick={() => router.back()}
-              className="inline-flex items-center gap-2 text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors mb-6 cursor-pointer bg-transparent border-none p-0"
+            <Link
+              href="/filieres"
+              className="inline-flex items-center gap-2 text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors mb-6 cursor-pointer"
             >
               <ArrowLeft size={16} />
-              Retour
-            </button>
+              Retour aux filières
+            </Link>
           </Reveal>
 
           <Reveal delay={100}>
@@ -78,7 +63,7 @@ function ClientPageContent({ currentFiliere, seriesList, bannerImage }: any) {
 
       {/* =========================================================
           CONTENU SUR FOND CLAIR AVEC BLOC SOMBRE (Style P1)
-          ========================================================= */}
+         ========================================================= */}
       <section className="bg-brume-100 py-16 w-full">
         <div className="container-isset">
           {/* Bloc rectangulaire au design sombre (style P1) */}
@@ -109,14 +94,11 @@ function ClientPageContent({ currentFiliere, seriesList, bannerImage }: any) {
             </h2>
           </Reveal>
 
-          {/* Grille responsive des séries */}
+          {/* Grille responsive des séries (Conteneur div : pas de clic fortuit sur toute la carte) */}
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {seriesList.map((s: any, idx: number) => (
               <Reveal key={s.slug} delay={300 + idx * 100}>
-                <a
-                  href={`/filieres/${s.filiereSlug}/${s.slug}`}
-                  className="card-premium group flex flex-col bg-white h-full justify-between p-6 rounded-2xl border border-nuit-100 shadow-sm hover:shadow-md transition-all"
-                >
+                <div className="card-premium group flex flex-col bg-white h-full justify-between p-6 rounded-2xl border border-nuit-100 shadow-sm hover:shadow-md transition-all">
                   <div>
                     <span className="inline-flex w-fit items-center rounded-full bg-cyan-500/10 px-3 py-1 text-xs font-bold text-cyan-600 mb-4">
                       {s.code}
@@ -128,11 +110,18 @@ function ClientPageContent({ currentFiliere, seriesList, bannerImage }: any) {
                       {s.resume}
                     </p>
                   </div>
-                  <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-cyan-600">
-                    Découvrir la série
-                    <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-                  </span>
-                </a>
+                  
+                  {/* SEUL CE BOUTON DÉCLENCHE LA NAVIGATION */}
+                  <div className="mt-6 pt-4 border-t border-slate-100">
+                    <Link
+                      href={`/filieres/${s.filiereSlug}/${s.slug}`}
+                      className="inline-flex items-center gap-2 text-sm font-semibold text-cyan-600 hover:text-cyan-700 transition-colors"
+                    >
+                      <span>Découvrir la série</span>
+                      <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  </div>
+                </div>
               </Reveal>
             ))}
           </div>
