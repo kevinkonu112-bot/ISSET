@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Trash2, Pencil, UploadCloud, Eye, EyeOff, X } from "lucide-react";
+import { Plus, Trash2, Pencil, UploadCloud, Eye, EyeOff, X, FileText, Film, Image as ImageIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 const TYPES = [
@@ -83,13 +83,13 @@ export default function ContentManager({ restrictType }: { restrictType?: string
             setEditing(null);
             setFormOpen(true);
           }}
-          className="btn-primary inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm w-full sm:w-auto shadow-md"
+          className="btn-primary inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm w-full sm:w-auto shadow-md cursor-pointer"
         >
           <Plus size={16} /> Nouveau contenu
         </button>
       </div>
 
-      {/* Conteneur de tableau unifié avec scroll horizontal natif fluide */}
+      {/* Conteneur de tableau unifié */}
       <div className="w-full bg-white rounded-2xl border border-nuit-900/5 shadow-xl overflow-hidden">
         <div className="w-full overflow-x-auto">
           <table className="w-full text-left text-sm whitespace-nowrap">
@@ -128,21 +128,21 @@ export default function ContentManager({ restrictType }: { restrictType?: string
                       <button 
                         onClick={() => toggleStatut(item)} 
                         title={item.statut === "publie" ? "Dépublier" : "Publier"} 
-                        className="p-2 rounded-xl text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition"
+                        className="p-2 rounded-xl text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition cursor-pointer"
                       >
                         {item.statut === "publie" ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
                       <button 
                         onClick={() => { setEditing(item); setFormOpen(true); }} 
                         title="Modifier" 
-                        className="p-2 rounded-xl text-cyan-600 bg-cyan-50 hover:bg-cyan-100 transition"
+                        className="p-2 rounded-xl text-cyan-600 bg-cyan-50 hover:bg-cyan-100 transition cursor-pointer"
                       >
                         <Pencil size={16} />
                       </button>
                       <button 
                         onClick={() => remove(item.id)} 
                         title="Supprimer" 
-                        className="p-2 rounded-xl text-red-600 bg-red-50 hover:bg-red-100 transition"
+                        className="p-2 rounded-xl text-red-600 bg-red-50 hover:bg-red-100 transition cursor-pointer"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -183,7 +183,7 @@ function ContentForm({
   const [description, setDescription] = useState(initial?.description || "");
   const [type, setType] = useState(initial?.type || defaultType || "cours");
   const [serieId, setSerieId] = useState(initial?.serie_id || "");
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [progress, setProgress] = useState(0);
   const [saving, setSaving] = useState(false);
   const [seriesOptions, setSeriesOptions] = useState<{ id: string; nom: string; code: string }[]>([]);
@@ -200,6 +200,16 @@ function ContentForm({
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
+  }
+
+  function handleFileChange(selectedFiles: FileList | null) {
+    if (!selectedFiles) return;
+    const newFiles = Array.from(selectedFiles);
+    setFiles((prev) => [...prev, ...newFiles]);
+  }
+
+  function removeFile(index: number) {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -230,41 +240,47 @@ function ContentForm({
       contentId = data.id;
     }
 
-    if (file && contentId) {
-      const ext = file.name.split(".").pop();
-      const path = `${type}/${contentId}/${Date.now()}.${ext}`;
+    if (files.length > 0 && contentId) {
+      let firstPublicUrl = "";
 
-      const { error: uploadError } = await supabase.storage
-        .from("isset-media")
-        .upload(path, file, {
-          cacheControl: "3600",
-          upsert: false,
-        });
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const ext = file.name.split(".").pop();
+        const path = `${type}/${contentId}/${Date.now()}_${i}.${ext}`;
 
-      if (!uploadError) {
-        setProgress(100);
-
-        const { data: publicUrlData } = supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from("isset-media")
-          .getPublicUrl(path);
+          .upload(path, file, {
+            cacheControl: "3600",
+            upsert: false,
+          });
 
-        const imageUrl = publicUrlData.publicUrl;
+        if (!uploadError) {
+          const { data: publicUrlData } = supabase.storage
+            .from("isset-media")
+            .getPublicUrl(path);
 
+          const fileUrl = publicUrlData.publicUrl;
+          if (i === 0) firstPublicUrl = fileUrl;
+
+          await supabase.from("media").insert({
+            content_id: contentId,
+            bucket: "isset-media",
+            path,
+            type: file.type.startsWith("video/") ? "video" : file.type.includes("pdf") ? "pdf" : "image",
+            taille_octets: file.size,
+            nom_original: file.name,
+          });
+        }
+
+        setProgress(Math.round(((i + 1) / files.length) * 100));
+      }
+
+      if (firstPublicUrl) {
         await supabase
           .from("contents")
-          .update({ image: imageUrl })
+          .update({ image: firstPublicUrl })
           .eq("id", contentId);
-
-        await supabase.from("media").insert({
-          content_id: contentId,
-          bucket: "isset-media",
-          path,
-          type: type === "video" ? "video" : type === "pdf" ? "pdf" : "image",
-          taille_octets: file.size,
-          nom_original: file.name,
-        });
-      } else {
-        alert("Le contenu a été enregistré mais l'upload du fichier a échoué : " + uploadError.message);
       }
     }
 
@@ -279,7 +295,7 @@ function ContentForm({
           <h2 className="font-display text-lg font-bold text-nuit-950">
             {initial ? "Modifier le contenu" : "Nouveau contenu"}
           </h2>
-          <button onClick={onClose} className="rounded-lg p-1.5 text-nuit-400 hover:bg-nuit-900/5">
+          <button onClick={onClose} className="rounded-lg p-1.5 text-nuit-400 hover:bg-nuit-900/5 cursor-pointer">
             <X size={18} />
           </button>
         </div>
@@ -315,27 +331,88 @@ function ContentForm({
             </div>
           </div>
 
+          {/* UPLOAD ET GESTION DE FICHIERS MULTIPLES */}
           <div>
-            <label className="text-sm font-medium text-nuit-800">Fichier (image, PDF ou vidéo)</label>
-            <label className="mt-1.5 flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-dashed border-nuit-900/15 px-4 py-6 text-center text-sm text-nuit-600 hover:border-cyan-400 bg-gray-50/50">
-              <UploadCloud size={20} className="text-cyan-500" />
-              {file ? file.name : "Cliquez pour sélectionner un fichier"}
+            <label className="text-sm font-medium text-nuit-800">Fichier(s) média (Images, PDF ou Vidéos)</label>
+            
+            <label className="mt-1.5 flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-dashed border-nuit-900/15 px-4 py-5 text-center text-sm text-nuit-600 hover:border-cyan-400 bg-gray-50/50 transition">
+              <UploadCloud size={24} className="text-cyan-500" />
+              <span>Cliquez pour sélectionner un ou plusieurs fichiers</span>
+              <span className="text-xs text-nuit-400">
+                Sur ordi : touche 'Ctrl' | Sur mobile : appui long sur les photos
+              </span>
               <input
                 type="file"
+                multiple
                 accept="image/*,application/pdf,video/*"
                 className="hidden"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                onChange={(e) => handleFileChange(e.target.files)}
               />
             </label>
-            {saving && file && (
-              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-nuit-900/10">
-                <div className="h-full bg-cyan-500 transition-all" style={{ width: `${progress}%` }} />
+
+            {/* LISTE ET MINIATURES DES FICHIERS SÉLECTIONNÉS */}
+            {files.length > 0 && (
+              <div className="mt-3 space-y-2">
+                <p className="text-xs font-semibold text-nuit-500">
+                  {files.length} fichier{files.length > 1 ? "s" : ""} sélectionné{files.length > 1 ? "s" : ""} :
+                </p>
+                <div className="max-h-48 overflow-y-auto space-y-2 pr-1">
+                  {files.map((file, idx) => (
+                    <div key={idx} className="relative rounded-xl border border-nuit-900/10 bg-nuit-900/5 p-2.5 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 overflow-hidden">
+                        {file.type.startsWith("image/") ? (
+                          <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-nuit-900/10 bg-white">
+                            <img 
+                              src={URL.createObjectURL(file)} 
+                              alt={`Aperçu ${idx + 1}`} 
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                        ) : file.type.startsWith("video/") ? (
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-600">
+                            <Film size={20} />
+                          </div>
+                        ) : (
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-600">
+                            <FileText size={20} />
+                          </div>
+                        )}
+
+                        <div className="truncate">
+                          <p className="text-xs font-semibold text-nuit-950 truncate">{file.name}</p>
+                          <p className="text-[10px] text-nuit-500">{(file.size / (1024 * 1024)).toFixed(2)} Mo</p>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => removeFile(idx)}
+                        title="Retirer ce fichier"
+                        className="shrink-0 rounded-lg p-1.5 text-red-600 hover:bg-red-50 transition cursor-pointer"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {saving && files.length > 0 && (
+              <div className="mt-3">
+                <div className="flex justify-between text-xs text-nuit-600 mb-1 font-medium">
+                  <span>Envoi des fichiers vers Supabase...</span>
+                  <span>{progress}%</span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-nuit-900/10">
+                  <div className="h-full bg-cyan-500 transition-all duration-300" style={{ width: `${progress}%` }} />
+                </div>
               </div>
             )}
           </div>
 
-          <button type="submit" disabled={saving} className="w-full py-3 disabled:opacity-60 btn-primary">
-            {saving ? "Enregistrement..." : initial ? "Enregistrer" : "Créer le contenu"}
+          <button type="submit" disabled={saving} className="w-full py-3 disabled:opacity-60 btn-primary cursor-pointer mt-4">
+            {saving ? `Enregistrement (${progress}%)...` : initial ? "Enregistrer les modifications" : "Créer le contenu"}
           </button>
         </form>
       </div>
