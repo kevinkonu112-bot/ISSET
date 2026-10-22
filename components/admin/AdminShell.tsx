@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import {
   LayoutDashboard,
@@ -10,13 +10,12 @@ import {
   Image as ImageIcon,
   GraduationCap,
   Settings,
-  LogOut,
   Menu,
   X,
   Globe,
   ExternalLink,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import LogoutButton from "@/components/LogoutButton";
 
 const NAV = [
   { href: "/admin/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
@@ -29,31 +28,23 @@ const NAV = [
 
 export default function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   if (pathname === "/admin/login") return <>{children}</>;
 
-  const handleLogout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/admin/login");
-    router.refresh();
-  };
-
   return (
-    <div className="flex min-h-screen bg-brume-200">
+    <div className="flex min-h-screen bg-slate-950 text-white">
       {/* Sidebar Desktop */}
-      <aside className="hidden w-72 shrink-0 flex-col border-r border-nuit-900/5 bg-nuit-950 text-white lg:flex justify-between">
+      <aside className="hidden w-72 shrink-0 flex-col border-r border-slate-800 bg-slate-900 text-white lg:flex justify-between">
         <div>
           {/* Logo & Titre */}
-          <div className="flex h-20 items-center gap-2.5 px-6 border-b border-white/10">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-400 to-nuit-700 font-display text-sm font-bold">
+          <div className="flex h-20 items-center gap-2.5 px-6 border-b border-slate-800">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-400 to-blue-700 font-display text-sm font-bold text-white shadow-md">
               I
             </span>
             <div>
-              <p className="font-display text-sm font-bold leading-none">ISSET ADMIN</p>
-              <p className="text-[10px] text-white/50 mt-1">Espace Directeur</p>
+              <p className="font-display text-sm font-bold leading-none text-white">ISSET ADMIN</p>
+              <p className="text-[10px] text-slate-400 mt-1">Digital Elite Lab</p>
             </div>
           </div>
 
@@ -66,7 +57,9 @@ export default function AdminShell({ children }: { children: ReactNode }) {
                   key={item.href}
                   href={item.href}
                   className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
-                    active ? "bg-cyan-500/15 text-cyan-400 font-semibold" : "text-white/60 hover:bg-white/5 hover:text-white"
+                    active 
+                      ? "bg-cyan-500/15 text-cyan-400 font-semibold border border-cyan-500/30" 
+                      : "text-slate-400 hover:bg-slate-800/60 hover:text-white"
                   }`}
                 >
                   <item.icon size={18} />
@@ -77,8 +70,8 @@ export default function AdminShell({ children }: { children: ReactNode }) {
           </nav>
         </div>
 
-        {/* Zone Inférieure : Bouton Aperçu du site & Déconnexion */}
-        <div className="p-4 space-y-2 border-t border-white/10">
+        {/* Zone Inférieure : Aperçu site & Déconnexion via LogoutButton */}
+        <div className="p-4 space-y-2 border-t border-slate-800">
           <Link
             href="/"
             target="_blank"
@@ -91,45 +84,41 @@ export default function AdminShell({ children }: { children: ReactNode }) {
             <ExternalLink size={14} className="opacity-80" />
           </Link>
 
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-white/60 hover:bg-white/5 hover:text-red-400 transition"
-          >
-            <LogOut size={18} /> Déconnexion
-          </button>
+          <LogoutButton />
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex min-h-screen flex-1 flex-col">
-        {/* Header Desktop Supérieur (Aperçu du site toujours accessible) */}
-        <header className="hidden lg:flex h-16 w-full items-center justify-between border-b border-nuit-900/5 bg-white px-10 shadow-xs">
-          <span className="text-xs font-semibold text-nuit-500">
+      <div className="flex min-h-screen flex-1 flex-col bg-slate-950">
+        {/* Header Desktop Supérieur */}
+        <header className="hidden lg:flex h-16 w-full items-center justify-between border-b border-slate-800 bg-slate-900/90 px-10 shadow-xs backdrop-blur-md">
+          <span className="text-xs font-semibold text-slate-400">
             Plateforme de gestion globale ISSET
           </span>
           <Link
             href="/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-cyan-50 border border-cyan-200 text-cyan-700 hover:bg-cyan-100 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
+            className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
           >
-            <Globe size={15} className="text-cyan-600" />
+            <Globe size={15} className="text-cyan-400" />
             <span>Voir le site en direct</span>
             <ExternalLink size={13} className="opacity-70" />
           </Link>
         </header>
 
-        {/* Header Mobile dédié */}
-        <header className="flex h-16 w-full items-center justify-between border-b border-nuit-900/10 bg-white px-4 lg:hidden shadow-sm z-20">
+        {/* Header Mobile */}
+        <header className="flex h-16 w-full items-center justify-between border-b border-slate-800 bg-slate-900 px-4 lg:hidden shadow-sm z-20">
           <div className="flex items-center gap-3">
             <button
+              type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-nuit-950 hover:bg-gray-200"
+              className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800 text-white hover:bg-slate-700"
               aria-label="Ouvrir le menu"
             >
               {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
-            <span className="font-display text-sm font-bold text-nuit-950">ISSET ADMIN</span>
+            <span className="font-display text-sm font-bold text-white">ISSET ADMIN</span>
           </div>
 
           <Link
@@ -144,7 +133,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
 
         {/* Menu déroulant mobile */}
         {mobileMenuOpen && (
-          <div className="border-b border-nuit-900/10 bg-white px-4 py-4 lg:hidden shadow-lg z-10 space-y-3">
+          <div className="border-b border-slate-800 bg-slate-900 px-4 py-4 lg:hidden shadow-lg z-10 space-y-3">
             <nav className="space-y-1">
               {NAV.map((item) => {
                 const active = pathname.startsWith(item.href);
@@ -154,7 +143,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
-                      active ? "bg-cyan-500/15 text-cyan-600 font-semibold" : "text-nuit-950 hover:bg-gray-100"
+                      active ? "bg-cyan-500/15 text-cyan-400 font-semibold" : "text-slate-300 hover:bg-slate-800"
                     }`}
                   >
                     <item.icon size={18} />
@@ -164,12 +153,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
               })}
             </nav>
 
-            <button
-              onClick={handleLogout}
-              className="w-full text-left text-xs font-semibold text-red-600 px-4 py-2 hover:bg-red-50 rounded-lg"
-            >
-              Déconnexion
-            </button>
+            <LogoutButton />
           </div>
         )}
 
