@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Plus, Trash2, Pencil, UploadCloud, Eye, EyeOff, X, FileText, Film, Image as ImageIcon } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
+import { Plus, Trash2, Pencil, UploadCloud, Eye, EyeOff, X, FileText, Film, Search, RotateCcw } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 const TYPES = [
@@ -33,11 +33,21 @@ export default function ContentManager({ restrictType }: { restrictType?: string
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<ContentRow | null>(null);
 
+  // FILTRES
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedType, setSelectedType] = useState<string>("all");
+  const [selectedStatut, setSelectedStatut] = useState<string>("all");
+
   async function load() {
     setLoading(true);
     let query = supabase.from("contents").select("*").order("created_at", { ascending: false });
+    
     if (restrictType === "actualites") query = query.in("type", ["annonce", "evenement"]);
     else if (restrictType === "galerie") query = query.eq("type", "image");
+    else if (restrictType === "cours") query = query.eq("type", "cours");
+    else if (restrictType === "video") query = query.eq("type", "video");
+    else if (restrictType === "pdf") query = query.eq("type", "pdf");
+
     const { data } = await query;
     setItems((data as ContentRow[]) || []);
     setLoading(false);
@@ -46,7 +56,24 @@ export default function ContentManager({ restrictType }: { restrictType?: string
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [restrictType]);
+
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      const matchesSearch =
+        item.titre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase()));
+      const matchesType = selectedType === "all" || item.type === selectedType;
+      const matchesStatut = selectedStatut === "all" || item.statut === selectedStatut;
+      return matchesSearch && matchesType && matchesStatut;
+    });
+  }, [items, searchTerm, selectedType, selectedStatut]);
+
+  function resetFilters() {
+    setSearchTerm("");
+    setSelectedType("all");
+    setSelectedStatut("all");
+  }
 
   async function toggleStatut(item: ContentRow) {
     const next = item.statut === "publie" ? "brouillon" : "publie";
@@ -56,40 +83,94 @@ export default function ContentManager({ restrictType }: { restrictType?: string
 
   async function remove(id: string) {
     if (!confirm("Supprimer définitivement ce contenu ?")) return;
-    
     const { error } = await supabase.from("contents").delete().eq("id", id);
-    
-    if (error) {
-      alert("Erreur : " + error.message);
-    } else {
-      load();
-    }
+    if (error) alert("Erreur : " + error.message);
+    else load();
   }
+
+  const getTitle = () => {
+    switch (restrictType) {
+      case "actualites": return "Actualités & Annonces";
+      case "galerie": return "Galerie de photos";
+      case "cours": return "Cours disponibles";
+      case "video": return "Vidéos pédagogiques";
+      case "pdf": return "Documents PDF";
+      default: return "Gestion globale des contenus";
+    }
+  };
+
+  const getDefaultTypeForForm = () => {
+    if (restrictType === "actualites") return "annonce";
+    if (restrictType === "galerie") return "image";
+    if (restrictType === "cours") return "cours";
+    if (restrictType === "video") return "video";
+    if (restrictType === "pdf") return "pdf";
+    return undefined;
+  };
+
+  const hasActiveFilters = searchTerm !== "" || selectedType !== "all" || selectedStatut !== "all";
 
   return (
     <div className="space-y-6 pb-12 w-full">
-      {/* En-tête */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="font-display text-xl sm:text-2xl font-bold text-nuit-950">
-            {restrictType === "actualites" ? "Actualités" : restrictType === "galerie" ? "Galerie" : "Contenus (cours, vidéos, PDF)"}
-          </h1>
+          <h1 className="font-display text-xl sm:text-2xl font-bold text-nuit-950">{getTitle()}</h1>
           <p className="mt-1 text-xs sm:text-sm text-nuit-500">
-            Créez, modifiez, publiez ou dépubliez vos contenus.
+            Gérez les publications rattachées aux séries et au site.
           </p>
         </div>
         <button
-          onClick={() => {
-            setEditing(null);
-            setFormOpen(true);
-          }}
+          onClick={() => { setEditing(null); setFormOpen(true); }}
           className="btn-primary inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm w-full sm:w-auto shadow-md cursor-pointer"
         >
           <Plus size={16} /> Nouveau contenu
         </button>
       </div>
 
-      {/* Conteneur de tableau unifié */}
+      <div className="bg-white p-4 rounded-2xl border border-nuit-900/5 shadow-sm space-y-3 sm:space-y-0 sm:flex sm:items-center sm:gap-3">
+        <div className="relative flex-1">
+          <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-nuit-400" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Rechercher par titre..."
+            className="w-full rounded-xl border border-nuit-900/15 bg-gray-50/50 pl-10 pr-4 py-2 text-sm text-nuit-950 outline-none focus:border-cyan-500 focus:bg-white transition"
+          />
+        </div>
+
+        <div className="flex items-center gap-2">
+          {!restrictType && (
+            <select
+              value={selectedType}
+              onChange={(e) => setSelectedType(e.target.value)}
+              className="rounded-xl border border-nuit-900/15 bg-gray-50/50 px-3 py-2 text-xs font-medium text-nuit-800 outline-none cursor-pointer"
+            >
+              <option value="all">Tous les types</option>
+              {TYPES.map((t) => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </select>
+          )}
+
+          <select
+            value={selectedStatut}
+            onChange={(e) => setSelectedStatut(e.target.value)}
+            className="rounded-xl border border-nuit-900/15 bg-gray-50/50 px-3 py-2 text-xs font-medium text-nuit-800 outline-none cursor-pointer"
+          >
+            <option value="all">Tous les statuts</option>
+            <option value="publie">Publiés</option>
+            <option value="brouillon">Brouillons</option>
+          </select>
+
+          {hasActiveFilters && (
+            <button onClick={resetFilters} className="rounded-xl bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-100 transition cursor-pointer">
+              <RotateCcw size={14} />
+            </button>
+          )}
+        </div>
+      </div>
+
       <div className="w-full bg-white rounded-2xl border border-nuit-900/5 shadow-xl overflow-hidden">
         <div className="w-full overflow-x-auto">
           <table className="w-full text-left text-sm whitespace-nowrap">
@@ -103,16 +184,12 @@ export default function ContentManager({ restrictType }: { restrictType?: string
             </thead>
             <tbody className="divide-y divide-nuit-900/5">
               {loading && (
-                <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-nuit-400">Chargement...</td>
-                </tr>
+                <tr><td colSpan={4} className="px-6 py-8 text-center text-nuit-400">Chargement...</td></tr>
               )}
-              {!loading && items.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-nuit-400">Aucun contenu trouvé.</td>
-                </tr>
+              {!loading && filteredItems.length === 0 && (
+                <tr><td colSpan={4} className="px-6 py-8 text-center text-nuit-400">Aucun contenu disponible pour cette section.</td></tr>
               )}
-              {items.map((item) => (
+              {filteredItems.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50/80 transition">
                   <td className="px-6 py-4 font-semibold text-nuit-900">{item.titre}</td>
                   <td className="px-6 py-4 text-xs text-nuit-500">
@@ -125,25 +202,13 @@ export default function ContentManager({ restrictType }: { restrictType?: string
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button 
-                        onClick={() => toggleStatut(item)} 
-                        title={item.statut === "publie" ? "Dépublier" : "Publier"} 
-                        className="p-2 rounded-xl text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition cursor-pointer"
-                      >
+                      <button onClick={() => toggleStatut(item)} className="p-2 rounded-xl text-emerald-600 bg-emerald-50 hover:bg-emerald-100 transition cursor-pointer">
                         {item.statut === "publie" ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
-                      <button 
-                        onClick={() => { setEditing(item); setFormOpen(true); }} 
-                        title="Modifier" 
-                        className="p-2 rounded-xl text-cyan-600 bg-cyan-50 hover:bg-cyan-100 transition cursor-pointer"
-                      >
+                      <button onClick={() => { setEditing(item); setFormOpen(true); }} className="p-2 rounded-xl text-cyan-600 bg-cyan-50 hover:bg-cyan-100 transition cursor-pointer">
                         <Pencil size={16} />
                       </button>
-                      <button 
-                        onClick={() => remove(item.id)} 
-                        title="Supprimer" 
-                        className="p-2 rounded-xl text-red-600 bg-red-50 hover:bg-red-100 transition cursor-pointer"
-                      >
+                      <button onClick={() => remove(item.id)} className="p-2 rounded-xl text-red-600 bg-red-50 hover:bg-red-100 transition cursor-pointer">
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -158,7 +223,7 @@ export default function ContentManager({ restrictType }: { restrictType?: string
       {formOpen && (
         <ContentForm
           initial={editing}
-          defaultType={restrictType === "actualites" ? "annonce" : restrictType === "galerie" ? "image" : undefined}
+          defaultType={getDefaultTypeForForm()}
           onClose={() => setFormOpen(false)}
           onSaved={() => { setFormOpen(false); load(); }}
         />
@@ -190,7 +255,6 @@ function ContentForm({
 
   useEffect(() => {
     supabase.from("series").select("id, nom, code").then(({ data }) => setSeriesOptions(data || []));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function slugify(str: string) {
@@ -204,8 +268,7 @@ function ContentForm({
 
   function handleFileChange(selectedFiles: FileList | null) {
     if (!selectedFiles) return;
-    const newFiles = Array.from(selectedFiles);
-    setFiles((prev) => [...prev, ...newFiles]);
+    setFiles((prev) => [...prev, ...Array.from(selectedFiles)]);
   }
 
   function removeFile(index: number) {
@@ -232,6 +295,7 @@ function ContentForm({
         .insert({ titre, description, type, serie_id: serieId || null, slug, auteur_id: user?.id, statut: "brouillon" })
         .select()
         .single();
+
       if (error) {
         alert("Erreur : " + error.message);
         setSaving(false);
@@ -250,16 +314,10 @@ function ContentForm({
 
         const { error: uploadError } = await supabase.storage
           .from("isset-media")
-          .upload(path, file, {
-            cacheControl: "3600",
-            upsert: false,
-          });
+          .upload(path, file, { cacheControl: "3600", upsert: false });
 
         if (!uploadError) {
-          const { data: publicUrlData } = supabase.storage
-            .from("isset-media")
-            .getPublicUrl(path);
-
+          const { data: publicUrlData } = supabase.storage.from("isset-media").getPublicUrl(path);
           const fileUrl = publicUrlData.publicUrl;
           if (i === 0) firstPublicUrl = fileUrl;
 
@@ -272,15 +330,11 @@ function ContentForm({
             nom_original: file.name,
           });
         }
-
         setProgress(Math.round(((i + 1) / files.length) * 100));
       }
 
       if (firstPublicUrl) {
-        await supabase
-          .from("contents")
-          .update({ image: firstPublicUrl })
-          .eq("id", contentId);
+        await supabase.from("contents").update({ image: firstPublicUrl }).eq("id", contentId);
       }
     }
 
@@ -303,7 +357,7 @@ function ContentForm({
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>
             <label className="text-sm font-medium text-nuit-800">Titre</label>
-            <input required value={titre} onChange={(e) => setTitre(e.target.value)} className="input mt-1.5" placeholder="Ex: Cours de géodésie..." />
+            <input required value={titre} onChange={(e) => setTitre(e.target.value)} className="input mt-1.5" placeholder="Ex: Cours de topographie..." />
           </div>
 
           <div>
@@ -321,9 +375,9 @@ function ContentForm({
               </select>
             </div>
             <div>
-              <label className="text-sm font-medium text-nuit-800">Série associée</label>
-              <select value={serieId} onChange={(e) => setSerieId(e.target.value)} className="input mt-1.5">
-                <option value="">— Aucune —</option>
+              <label className="text-sm font-medium text-nuit-800">Série associée *</label>
+              <select required value={serieId} onChange={(e) => setSerieId(e.target.value)} className="input mt-1.5 font-semibold text-cyan-700">
+                <option value="">— Choisir la série —</option>
                 {seriesOptions.map((s) => (
                   <option key={s.id} value={s.id}>{s.code} — {s.nom}</option>
                 ))}
@@ -331,42 +385,25 @@ function ContentForm({
             </div>
           </div>
 
-          {/* UPLOAD ET GESTION DE FICHIERS MULTIPLES */}
           <div>
             <label className="text-sm font-medium text-nuit-800">Fichier(s) média (Images, PDF ou Vidéos)</label>
-            
             <label className="mt-1.5 flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-dashed border-nuit-900/15 px-4 py-5 text-center text-sm text-nuit-600 hover:border-cyan-400 bg-gray-50/50 transition">
               <UploadCloud size={24} className="text-cyan-500" />
               <span>Cliquez pour sélectionner un ou plusieurs fichiers</span>
-              <span className="text-xs text-nuit-400">
-                Sur ordi : touche 'Ctrl' | Sur mobile : appui long sur les photos
-              </span>
-              <input
-                type="file"
-                multiple
-                accept="image/*,application/pdf,video/*"
-                className="hidden"
-                onChange={(e) => handleFileChange(e.target.files)}
-              />
+              <span className="text-xs text-nuit-400">Sur ordi : touche 'Ctrl' | Sur mobile : appui long</span>
+              <input type="file" multiple accept="image/*,application/pdf,video/*" className="hidden" onChange={(e) => handleFileChange(e.target.files)} />
             </label>
 
-            {/* LISTE ET MINIATURES DES FICHIERS SÉLECTIONNÉS */}
             {files.length > 0 && (
               <div className="mt-3 space-y-2">
-                <p className="text-xs font-semibold text-nuit-500">
-                  {files.length} fichier{files.length > 1 ? "s" : ""} sélectionné{files.length > 1 ? "s" : ""} :
-                </p>
+                <p className="text-xs font-semibold text-nuit-500">{files.length} fichier(s) sélectionné(s) :</p>
                 <div className="max-h-48 overflow-y-auto space-y-2 pr-1">
                   {files.map((file, idx) => (
                     <div key={idx} className="relative rounded-xl border border-nuit-900/10 bg-nuit-900/5 p-2.5 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3 overflow-hidden">
                         {file.type.startsWith("image/") ? (
                           <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-nuit-900/10 bg-white">
-                            <img 
-                              src={URL.createObjectURL(file)} 
-                              alt={`Aperçu ${idx + 1}`} 
-                              className="h-full w-full object-cover"
-                            />
+                            <img src={URL.createObjectURL(file)} alt="" className="h-full w-full object-cover" />
                           </div>
                         ) : file.type.startsWith("video/") ? (
                           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-600">
@@ -377,19 +414,12 @@ function ContentForm({
                             <FileText size={20} />
                           </div>
                         )}
-
                         <div className="truncate">
                           <p className="text-xs font-semibold text-nuit-950 truncate">{file.name}</p>
                           <p className="text-[10px] text-nuit-500">{(file.size / (1024 * 1024)).toFixed(2)} Mo</p>
                         </div>
                       </div>
-
-                      <button
-                        type="button"
-                        onClick={() => removeFile(idx)}
-                        title="Retirer ce fichier"
-                        className="shrink-0 rounded-lg p-1.5 text-red-600 hover:bg-red-50 transition cursor-pointer"
-                      >
+                      <button type="button" onClick={() => removeFile(idx)} className="shrink-0 rounded-lg p-1.5 text-red-600 hover:bg-red-50 transition cursor-pointer">
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -401,7 +431,7 @@ function ContentForm({
             {saving && files.length > 0 && (
               <div className="mt-3">
                 <div className="flex justify-between text-xs text-nuit-600 mb-1 font-medium">
-                  <span>Envoi des fichiers vers Supabase...</span>
+                  <span>Envoi vers Supabase...</span>
                   <span>{progress}%</span>
                 </div>
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-nuit-900/10">
