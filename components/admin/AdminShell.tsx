@@ -10,6 +10,7 @@ import {
   Image as ImageIcon,
   GraduationCap,
   Settings,
+  ShieldCheck,
   Menu,
   X,
   Globe,
@@ -23,7 +24,8 @@ const NAV = [
   { href: "/admin/actualites", label: "Actualités", icon: Newspaper },
   { href: "/admin/galerie", label: "Galerie", icon: ImageIcon },
   { href: "/admin/series", label: "Filières & séries", icon: GraduationCap },
-  { href: "/admin/parametres", label: "Paramètres", icon: Settings },
+  { href: "/admin/securite", label: "Sécurité & Compte", icon: ShieldCheck },
+  { href: "/admin/parametres", label: "Paramètres du site", icon: Settings },
 ];
 
 export default function AdminShell({ children }: { children: ReactNode }) {
@@ -37,7 +39,6 @@ export default function AdminShell({ children }: { children: ReactNode }) {
       {/* Sidebar Desktop */}
       <aside className="hidden w-72 shrink-0 flex-col border-r border-slate-800 bg-slate-900 text-white lg:flex justify-between">
         <div>
-          {/* Logo & Titre */}
           <div className="flex h-20 items-center gap-2.5 px-6 border-b border-slate-800">
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-400 to-blue-700 font-display text-sm font-bold text-white shadow-md">
               I
@@ -48,8 +49,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
             </div>
           </div>
 
-          {/* Navigation Principale */}
-          <nav className="space-y-1 px-4 mt-6">
+          <nav className="space-y-1.5 px-4 mt-6">
             {NAV.map((item) => {
               const active = pathname.startsWith(item.href);
               return (
@@ -58,7 +58,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
                   href={item.href}
                   className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
                     active 
-                      ? "bg-cyan-500/15 text-cyan-400 font-semibold border border-cyan-500/30" 
+                      ? "bg-cyan-500/15 text-cyan-400 font-semibold border border-cyan-500/30 shadow-sm" 
                       : "text-slate-400 hover:bg-slate-800/60 hover:text-white"
                   }`}
                 >
@@ -70,8 +70,8 @@ export default function AdminShell({ children }: { children: ReactNode }) {
           </nav>
         </div>
 
-        {/* Zone Inférieure : Aperçu site & Déconnexion via LogoutButton */}
-        <div className="p-4 space-y-2 border-t border-slate-800">
+        {/* Zone Inférieure : Lien direct site & Déconnexion rouge */}
+        <div className="p-4 space-y-3 border-t border-slate-800">
           <Link
             href="/"
             target="_blank"
@@ -88,9 +88,8 @@ export default function AdminShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      {/* Main Content Area */}
+      {/* Main Content */}
       <div className="flex min-h-screen flex-1 flex-col bg-slate-950">
-        {/* Header Desktop Supérieur */}
         <header className="hidden lg:flex h-16 w-full items-center justify-between border-b border-slate-800 bg-slate-900/90 px-10 shadow-xs backdrop-blur-md">
           <span className="text-xs font-semibold text-slate-400">
             Plateforme de gestion globale ISSET
@@ -113,8 +112,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800 text-white hover:bg-slate-700"
-              aria-label="Ouvrir le menu"
+              className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800 text-white"
             >
               {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
@@ -125,13 +123,12 @@ export default function AdminShell({ children }: { children: ReactNode }) {
             href="/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 bg-cyan-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-xs"
+            className="inline-flex items-center gap-1.5 bg-cyan-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold"
           >
             <Globe size={14} /> Site
           </Link>
         </header>
 
-        {/* Menu déroulant mobile */}
         {mobileMenuOpen && (
           <div className="border-b border-slate-800 bg-slate-900 px-4 py-4 lg:hidden shadow-lg z-10 space-y-3">
             <nav className="space-y-1">
@@ -142,7 +139,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
                     key={item.href}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
+                    className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium ${
                       active ? "bg-cyan-500/15 text-cyan-400 font-semibold" : "text-slate-300 hover:bg-slate-800"
                     }`}
                   >
@@ -152,12 +149,10 @@ export default function AdminShell({ children }: { children: ReactNode }) {
                 );
               })}
             </nav>
-
             <LogoutButton />
           </div>
         )}
 
-        {/* Contenu principal */}
         <main className="flex-1 p-6 sm:p-10">{children}</main>
       </div>
     </div>

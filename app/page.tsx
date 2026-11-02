@@ -4,9 +4,18 @@ import { ArrowRight, GraduationCap, Cpu, Building2, Wrench, Sparkles } from "luc
 import Reveal from "@/components/Reveal";
 import { FILIERES, SERIES, whatsappHref } from "@/lib/data";
 import { getActualites, mediaPublicUrl } from "@/lib/contents";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function HomePage() {
   const actualites = await getActualites(3);
+
+  // Récupération des paramètres dynamiques de l'administration
+  const supabase = createClient();
+  const { data: paramData } = await supabase.from("parametres").select("cle, valeur");
+  const p: Record<string, string> = {};
+  paramData?.forEach((item) => {
+    p[item.cle] = item.valeur || "";
+  });
 
   return (
     <div>
@@ -152,8 +161,7 @@ export default async function HomePage() {
               Un établissement tourné vers la science, la technique et l'avenir à Tsévié.
             </h2>
             <p className="mt-6 leading-relaxed text-slate-700">
-              [À RENSEIGNER PAR L'ADMINISTRATEUR] — présentation générale de l'établissement,
-              de son histoire et de son ancrage à Tsévié.
+              {p["a_propos"] || "[À RENSEIGNER PAR L'ADMINISTRATEUR] — présentation générale de l'établissement, de son histoire et de son ancrage à Tsévié."}
             </p>
             <Link href="/a-propos" className="btn-outline-dark mt-8 inline-flex items-center">
               En savoir plus <ArrowRight size={16} className="ml-2" />
@@ -163,16 +171,32 @@ export default async function HomePage() {
           <Reveal delay={150}>
             <div className="grid gap-5 sm:grid-cols-2">
               {[
-                { title: "Mission", text: "[À RENSEIGNER PAR L'ADMINISTRATEUR]" },
-                { title: "Vision", text: "[À RENSEIGNER PAR L'ADMINISTRATEUR]" },
-                { title: "Valeurs", text: "[À RENSEIGNER PAR L'ADMINISTRATEUR]" },
-                { title: "Mot du directeur", text: "[À RENSEIGNER PAR L'ADMINISTRATEUR]" },
+                { title: "Mission", text: p["mission"] || "[À RENSEIGNER PAR L'ADMINISTRATEUR]" },
+                { title: "Vision", text: p["vision"] || "[À RENSEIGNER PAR L'ADMINISTRATEUR]" },
+                { title: "Valeurs", text: p["valeurs"] || "[À RENSEIGNER PAR L'ADMINISTRATEUR]" },
+                { 
+                  title: "Mot du directeur", 
+                  text: p["mot_directeur"] || "[À RENSEIGNER PAR L'ADMINISTRATEUR]",
+                  hasPhoto: true 
+                },
               ].map((item) => (
-                <div key={item.title} className="card-premium bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                  <h3 className="font-display text-base font-semibold text-slate-950">
-                    {item.title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-600">{item.text}</p>
+                <div key={item.title} className="card-premium bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-display text-base font-semibold text-slate-950">
+                      {item.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-slate-600">{item.text}</p>
+                  </div>
+                  {item.hasPhoto && p["photo_directeur_url"] && (
+                    <div className="mt-4 pt-4 border-t border-slate-100 flex items-center gap-3">
+                      <img 
+                        src={p["photo_directeur_url"]} 
+                        alt="Directeur ISSET" 
+                        className="w-12 h-12 rounded-xl object-cover shadow-sm border border-slate-200"
+                      />
+                      <span className="text-xs font-bold text-slate-900">Direction ISSET</span>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

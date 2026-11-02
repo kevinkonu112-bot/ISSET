@@ -3,14 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { LogOut, AlertTriangle } from "lucide-react";
+import { LogOut, AlertTriangle, X } from "lucide-react";
 
 export default function LogoutButton() {
-  const [openModal, setOpenModal] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogout = async () => {
+  const handleConfirmSignout = async () => {
     setLoading(true);
     try {
       const supabase = createClient();
@@ -18,56 +18,64 @@ export default function LogoutButton() {
       router.push("/admin/login");
       router.refresh();
     } catch (error) {
-      console.error("Erreur déconnexion :", error);
+      console.error("Erreur de déconnexion :", error);
       setLoading(false);
     }
   };
 
   return (
     <>
-      {/* Bouton du menu */}
       <button
         type="button"
-        onClick={() => setOpenModal(true)}
-        className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition cursor-pointer text-left"
+        onClick={() => setIsOpen(true)}
+        className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-400 hover:bg-red-500/10 border border-red-500/25 transition cursor-pointer text-left shadow-sm"
       >
         <LogOut size={18} />
-        <span>Déconnexion</span>
+        <span>Se déconnecter</span>
       </button>
 
-      {/* Fenêtre de confirmation (Modal React isolé) */}
-      {openModal && (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl text-white">
+      {isOpen && (
+        <div className="fixed inset-0 z-[999999] flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl text-white relative space-y-6">
             
-            <div className="flex items-center gap-3 text-red-400 mb-4">
-              <div className="p-3 bg-red-500/10 rounded-xl border border-red-500/20">
-                <AlertTriangle size={24} />
+            <button
+              onClick={() => setIsOpen(false)}
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="flex items-center gap-4">
+              <div className="p-3.5 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400">
+                <AlertTriangle size={26} />
               </div>
-              <h3 className="text-lg font-bold">Confirmation de déconnexion</h3>
+              <div>
+                <h3 className="font-display text-lg font-bold">Confirmation de déconnexion</h3>
+                <p className="text-xs text-slate-400">Sécurité de session ISSET</p>
+              </div>
             </div>
 
             <p className="text-sm text-slate-300 leading-relaxed">
-              Êtes-vous sûr de vouloir vous déconnecter de l'administration ISSET ?
+              Êtes-vous sûr de vouloir vous déconnecter ? Vous devrez saisir à nouveau vos identifiants pour accéder au panneau d'administration.
             </p>
 
-            <div className="mt-6 flex items-center justify-end gap-3">
+            <div className="flex items-center justify-end gap-3 pt-2">
               <button
                 type="button"
-                onClick={() => setOpenModal(false)}
+                onClick={() => setIsOpen(false)}
                 disabled={loading}
-                className="px-4 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                className="px-5 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 transition cursor-pointer"
               >
                 Annuler
               </button>
 
               <button
                 type="button"
-                onClick={handleLogout}
+                onClick={handleConfirmSignout}
                 disabled={loading}
-                className="px-4 py-2.5 rounded-xl text-xs font-semibold bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-600/30 transition"
+                className="px-5 py-2.5 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-600/30 transition cursor-pointer flex items-center gap-2"
               >
-                {loading ? "Déconnexion..." : "Oui, me déconnecter"}
+                {loading ? "Déconnexion..." : "Confirmer"}
               </button>
             </div>
 
