@@ -47,9 +47,11 @@ export default function AdminParametresPage() {
       { cle: "photo_censeur_url", valeur: values["photo_censeur_url"] || "" },
     ];
 
-    const { error } = await Promise.all(
+    const results = await Promise.all(
       payload.map((item) => supabase.from("parametres").upsert(item))
     );
+
+    const error = results.find((r) => r.error)?.error;
 
     setSaving(false);
     if (!error) {
@@ -71,7 +73,6 @@ export default function AdminParametresPage() {
       const fileName = `${targetKey}-${Date.now()}.${fileExt}`;
       const filePath = `parametres/${fileName}`;
 
-      // Utilisation du bucket actif 'isset-media' déjà configuré sur votre Supabase
       const { error: uploadError } = await supabase.storage.from("isset-media").upload(filePath, file);
       if (uploadError) {
         throw new Error("Erreur Storage : " + uploadError.message);
