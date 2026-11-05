@@ -32,7 +32,7 @@ export default function ChangePasswordForm() {
     try {
       const supabase = createClient();
 
-      // Étape de sécurité optionnelle : vérifier le mot de passe actuel en tentant de se re-authentifier
+      // Étape de sécurité : vérifier le mot de passe actuel en tentant de se re-authentifier
       const { data: { user } } = await supabase.auth.getUser();
       if (!user || !user.email) {
         throw new Error("Utilisateur non authentifié.");
@@ -61,7 +61,7 @@ export default function ChangePasswordForm() {
       setNewPassword("");
       setConfirmPassword("");
     } catch (err: any) {
-      setMessage({ type: "error", text: err.message || une erreur est survenue. });
+      setMessage({ type: "error", text: err.message || "Une erreur est survenue." });
     } finally {
       setLoading(false);
     }
